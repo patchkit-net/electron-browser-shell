@@ -1,6 +1,7 @@
 /** App-specific implementation details for extensions. */
 export interface ChromeExtensionImpl {
   createTab?(
+    extension: Electron.Extension,
     details: chrome.tabs.CreateProperties
   ): Promise<[Electron.WebContents, Electron.BrowserWindow]>
   selectTab?(tab: Electron.WebContents, window: Electron.BrowserWindow): void
@@ -12,6 +13,6 @@ export interface ChromeExtensionImpl {
    */
   assignTabDetails?(details: chrome.tabs.Tab, tab: Electron.WebContents): void
 
-  createWindow?(details: chrome.windows.CreateData): Promise<Electron.BrowserWindow>
+  createWindow?(extension: Electron.Extension, details: chrome.windows.CreateData): Promise<Electron.BrowserWindow>
   removeWindow?(window: Electron.BrowserWindow): void
 }

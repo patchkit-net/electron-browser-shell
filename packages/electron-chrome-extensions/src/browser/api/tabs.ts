@@ -143,7 +143,7 @@ export class TabsAPI {
   }
 
   private async create(event: ExtensionEvent, details: chrome.tabs.CreateProperties = {}) {
-    const tab = await this.ctx.store.createTab(details)
+    const tab = await this.ctx.store.createTab(event.extension, details)
     const tabDetails = this.getTabDetails(tab)
     if (details.active) {
       queueMicrotask(() => this.onActivated(tab.id))

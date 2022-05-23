@@ -110,7 +110,7 @@ export class WindowsAPI {
   }
 
   private async create(event: ExtensionEvent, details: chrome.windows.CreateData) {
-    const win = await this.ctx.store.createWindow(event, details)
+    const win = await this.ctx.store.createWindow(event.extension, details)
     return this.getWindowDetails(win)
   }
 
