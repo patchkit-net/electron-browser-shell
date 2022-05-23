@@ -113,14 +113,14 @@ export class ExtensionStore extends EventEmitter {
 
     // TODO: clear active tab
 
+    if (typeof this.impl.removeTab === 'function') {
+      this.impl.removeTab(tab, win)
+    }
+
     // Clear window if it has no remaining tabs
     const windowHasTabs = Array.from(this.tabs).find((tab) => this.tabToWindow.get(tab) === win)
     if (!windowHasTabs) {
-      this.windows.delete(win)
-    }
-
-    if (typeof this.impl.removeTab === 'function') {
-      this.impl.removeTab(tab, win)
+      this.removeWindow(win);
     }
 
     this.emit('tab-removed', tabId)
