@@ -71,24 +71,24 @@ export class BrowserActionAPI {
 
     const getter =
       (propName: ExtensionActionKey) =>
-      ({ extension }: ExtensionEvent, details: chrome.browserAction.TabDetails = {}) => {
-        const { tabId } = details
-        const action = this.getAction(extension.id)
+        ({ extension }: ExtensionEvent, details: chrome.browserAction.TabDetails = {}) => {
+          const { tabId } = details
+          const action = this.getAction(extension.id)
 
-        let result
+          let result
 
-        if (tabId) {
-          if (action.tabs[tabId]) {
-            result = action.tabs[tabId][propName]
+          if (tabId) {
+            if (action.tabs[tabId]) {
+              result = action.tabs[tabId][propName]
+            } else {
+              result = action[propName]
+            }
           } else {
             result = action[propName]
           }
-        } else {
-          result = action[propName]
-        }
 
-        return result
-      }
+          return result
+        }
 
     const setDetails = (
       { extension }: ExtensionEvent,
@@ -118,8 +118,8 @@ export class BrowserActionAPI {
 
     const setter =
       (propName: ExtensionActionKey) =>
-      (event: ExtensionEvent, details: chrome.browserAction.TabDetails) =>
-        setDetails(event, details, propName)
+        (event: ExtensionEvent, details: chrome.browserAction.TabDetails) =>
+          setDetails(event, details, propName)
 
     const handleProp = (prop: string, key: ExtensionActionKey) => {
       handle(`browserAction.get${prop}`, getter(key))
@@ -346,17 +346,9 @@ export class BrowserActionAPI {
     }
   }
 
-  private activateClick(details: ActivateDetails) {
-    const { extensionId, tabId, anchorRect } = details
-
-    if (this.popup) {
-      const toggleExtension = !this.popup.isDestroyed() && this.popup.extensionId === extensionId
-      this.popup.destroy()
-      this.popup = undefined
-      if (toggleExtension) {
-        debug('skipping activate to close popup')
-        return
-      }
+  openPopup({ extensionId, tabId, anchorRect }: { extensionId: string, tabId: number, anchorRect: ActivateDetails['anchorRect'] }) {
+    if (this.popup && this.popup.extensionId !== extensionId) {
+      this.closePopup()
     }
 
     const tab =
@@ -390,6 +382,32 @@ export class BrowserActionAPI {
       const tabDetails = this.ctx.store.tabDetailsCache.get(tab.id)
       this.ctx.router.sendEvent(extensionId, 'browserAction.onClicked', tabDetails)
     }
+  }
+
+  closePopup() {
+    if (this.popup) {
+      this.popup.destroy()
+      this.popup = undefined
+    }
+  }
+
+  togglePopup({ extensionId, tabId, anchorRect }: { extensionId: string, tabId: number, anchorRect: ActivateDetails['anchorRect'] }) {
+    if (this.popup) {
+      const toggleExtension = !this.popup.isDestroyed() && this.popup.extensionId === extensionId
+      this.closePopup();
+      if (toggleExtension) {
+        debug('skipping activate to close popup')
+        return
+      }
+    }
+
+    this.openPopup({ extensionId, tabId, anchorRect })
+  }
+
+  private activateClick(details: ActivateDetails) {
+    const { extensionId, tabId, anchorRect } = details
+
+    this.togglePopup({ extensionId, tabId, anchorRect })
   }
 
   private activateContextMenu(details: ActivateDetails) {

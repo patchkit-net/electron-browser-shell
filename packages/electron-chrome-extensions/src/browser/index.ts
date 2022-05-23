@@ -109,7 +109,7 @@ export class ElectronChromeExtensions extends EventEmitter {
     try {
       const stat = await fs.stat(preloadPath)
       preloadExists = stat.isFile()
-    } catch {}
+    } catch { }
 
     if (!preloadExists) {
       console.error(
@@ -170,6 +170,18 @@ export class ElectronChromeExtensions extends EventEmitter {
   removeExtension(extension: Electron.Extension) {
     console.warn('ElectronChromeExtensions.removeExtension() is deprecated')
     this.api.browserAction.removeActions(extension.id)
+  }
+
+  openPopup(args: Parameters<BrowserActionAPI['openPopup']>[0]) {
+    this.api.browserAction.openPopup(args);
+  }
+
+  closePopup() {
+    this.api.browserAction.closePopup();
+  }
+
+  togglePopup(args: Parameters<BrowserActionAPI['togglePopup']>[0]) {
+    this.api.browserAction.togglePopup(args);
   }
 }
 
